@@ -6,7 +6,7 @@ package com.mycompany.carga_excel;
 
 /**
  *
- * @author ELIZABETH
+ * @author Juan Pablo Zacarias
  */
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -21,10 +21,10 @@ public class conexion_bd {
 
     Connection conectar() {
         String connectionUrl
-                = "jdbc:sqlserver://LAPTOP-RTDRNU0C\\SQLEXPRESS; "
+                = "jdbc:sqlserver://192.168.196.23\\SQLEXPRESS; "
                 + "databaseName=ejemplo;"
-                + "user=usuario1;"
-                + "password=12345;"
+                + "user=zagj;"
+                + "password=1380JpLm;"
                 + "encrypt=true;"
                 + "trustServerCertificate=true;";
         ResultSet resultSet = null;

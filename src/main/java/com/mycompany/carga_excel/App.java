@@ -6,6 +6,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import java.io.IOException;
+import javafx.scene.image.Image;
 /**
  * JavaFX App
  */
@@ -15,8 +16,12 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
-        scene = new Scene(loadFXML("primary"), 640, 480);
+        scene = new Scene(loadFXML("primary"));
         stage.setScene(scene);
+        stage.setTitle("Cargar datos Excel");
+        Image icon = new Image("file:src/main/resources/com/mycompany/carga_excel/img/agrnieto.png");
+        stage.getIcons().add(icon);
+   
         stage.show();
     }
 
