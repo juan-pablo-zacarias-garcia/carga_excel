@@ -1,8 +1,12 @@
 package com.mycompany.carga_excel;
 
+import com.mycompany.carga_excel.clases.Excel;
 import javafx.fxml.FXML;
-import com.mycompany.carga_excel.ReadExcel;
 import java.io.File;
+import java.io.IOException;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Label;
@@ -47,7 +51,7 @@ public class PrimaryController {
     //Lee el archivo de excel cargado y lo exporta a la base de datos
     @FXML
     void exportar() {
-        ReadExcel re = new ReadExcel();
+        Excel re = new Excel();
         if (archivo != null) {
             //Lee el archivo en la hoja 0, la tabla de esa hoja contiene 9 columnas
             re.leer(archivo, 0, 9);
@@ -59,7 +63,24 @@ public class PrimaryController {
             alert("Archivo no cargado", "No se ha seleccionado ningun archivo", AlertType.WARNING);
         }
     }
-
+    @FXML
+    void config_bd(){
+        //se abre una nueva ventana
+        Parent root;
+        try {
+            root = FXMLLoader.load(getClass().getClassLoader().getResource("com/mycompany/carga_excel/form_bd.fxml"));
+            Stage stage = new Stage();
+            stage.setTitle("Configuración de base de datos");
+            stage.setScene(new Scene(root));
+            stage.resizableProperty().setValue(false);
+            stage.show();
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+        
+    }
+    
     @FXML
     void salir() {
         System.exit(0);

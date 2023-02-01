@@ -2,12 +2,13 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package com.mycompany.carga_excel;
+package com.mycompany.carga_excel.clases;
 
 /**
  *
  * @author Juan Pablo Zacarias
  */
+import com.mycompany.carga_excel.clases.Conexion_bd;
 import java.io.File;
 import org.apache.poi.ss.usermodel.Cell;
 import static org.apache.poi.ss.usermodel.CellType.NUMERIC;
@@ -22,14 +23,14 @@ import java.util.ArrayList;
 import javafx.scene.control.Alert;
 import javafx.stage.StageStyle;
 
-public class ReadExcel {
-    
+public class Excel {
+
     //La variable items almacenará los datos de las celdas de excel
-    ArrayList datos;
+    public ArrayList datos;
     //Guarda el número de columnas de la tabla
     int no_columns;
 
-    void leer(File file, int no_sheet, int no_columns) {
+    public void leer(File file, int no_sheet, int no_columns) {
 
         try {
             //instancia del objeto workbook para archivos xlsx
@@ -67,9 +68,9 @@ public class ReadExcel {
         }
     }
 
-    void exportar_datos(ArrayList items, int no_columns) {
+    public void exportar_datos(ArrayList items, int no_columns) {
         //inicio la conexion para cargar los datos;
-        conexion_bd con = new conexion_bd();
+        Conexion_bd obj_bd = new Conexion_bd();
         //completo la consulta
         String query = "INSERT INTO empleados "
                 + "(id,"
@@ -83,39 +84,43 @@ public class ReadExcel {
                 + " grupo_de_clientes)"
                 + "VALUES";
         //se crea una conexion
-        Connection conn = con.conectar();
+        Connection conn = obj_bd.conectar();
         //index para extraer elementos del arraylist con las celdas de excel
-        //incia en 9 para omitir la fila de los títulos
+        //incia en no_columns para omitir la fila de los títulos
         int index_item = no_columns;
         //almacena los valores de cada fila
         String values;
         //número de filas del documento menos la fila de encabezados
         int no_filas = (items.size() / no_columns) - 1;
 
-        
-        for (int i = 0; i < no_filas; i++) {
-            values = "";
-            //se extraen los elementos del arraylist dependiendo el número de columnas y se les da formato
-            for (int j = 0; j < no_columns; j++) {
-                if (index_item < items.size()) {
-                    values = values + "\'" + items.get(index_item) + "\',";
-                    //index del array list
-                    index_item++;
+        if (conn != null) {
+            for (int i = 0; i < no_filas; i++) {
+                values = "";
+                //se extraen los elementos del arraylist dependiendo el número de columnas y se les da formato
+                for (int j = 0; j < no_columns; j++) {
+                    if (index_item < items.size()) {
+                        values = values + "\'" + items.get(index_item) + "\',";
+                        //index del array list
+                        index_item++;
+                    }
                 }
+                //se quita la última coma a values
+                values = values.substring(0, values.length() - 1);
+                //se realiza la consulta sql
+                obj_bd.insert(query + "(" + values + ")", conn);
             }
-            //se quita la última coma a values
-            values = values.substring(0, values.length() - 1);
-            //se realiza la consulta sql
-            con.insert(query + "(" + values + ")", conn);
+            //Alerta sobre datos cargados
+            alert("Datos exportados", "Se han cargado " + no_filas + ""
+                    + " registros en la base de datos", Alert.AlertType.INFORMATION);
+            //se reinicia el index del array list
+            index_item = no_columns;
+            //Cierra a conexión
+            obj_bd.cerrar_conexion(conn);
+        }
+        else{
+            
         }
 
-        //Alerta sobre datos cargados
-        alert("Datos exportados", "Se han cargado " + no_filas + ""
-                + " registros en la base de datos", Alert.AlertType.INFORMATION);
-        //se reinicia el index del array list
-        index_item = no_columns;
-        //Cierra a conexión
-        con.cerrar_conexion(conn);
     }
 
     //Método para mostrar alertas
@@ -123,7 +128,6 @@ public class ReadExcel {
         Alert alerta_archivo = new Alert(type);
         alerta_archivo.setTitle(title);
         alerta_archivo.setContentText(msg);
-        alerta_archivo.initStyle(StageStyle.UTILITY);
         alerta_archivo.showAndWait();
     }
 
