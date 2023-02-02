@@ -5,7 +5,6 @@
 package com.mycompany.carga_excel.clases;
 
 import java.security.Key;
-import java.security.NoSuchAlgorithmException;
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.spec.SecretKeySpec;
@@ -21,7 +20,6 @@ public class Alg_enc {
         // Alternativamente, una clave que queramos que tenga al menos 16 bytes
         // y nos quedamos con los bytes 0 a 15
         key = new SecretKeySpec(llave16b.getBytes(), 0, 16, "AES");
-
         // Ver como se puede guardar esta clave en un fichero y recuperarla
         // posteriormente en la clase RSAAsymetricCrypto.java
         // Se obtiene un cifrador AES
@@ -44,7 +42,6 @@ public class Alg_enc {
         // Alternativamente, una clave que queramos que tenga al menos 16 bytes
         // y nos quedamos con los bytes 0 a 15
         key = new SecretKeySpec(llave16b.getBytes(), 0, 16, "AES");
-
         // Ver como se puede guardar esta clave en un fichero y recuperarla
         // posteriormente en la clase RSAAsymetricCrypto.java
         // Se obtiene un cifrador AES
