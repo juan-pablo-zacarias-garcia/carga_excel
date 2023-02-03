@@ -14,6 +14,7 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import com.mycompany.carga_excel.clases.Conexion_bd;
+import java.sql.Connection;
 import javafx.scene.control.Alert;
 
 /**
@@ -84,7 +85,14 @@ public class Form_bdController implements Initializable {
     
     @FXML
     void probar_conexion() throws Exception{
-        obj_bd.conectar();
+        Connection con = obj_bd.conectar("");
+        if(con!=null){
+            obj_bd.alert("Estatus de conexión", "Conexión exitosa", Alert.AlertType.INFORMATION);
+            con.close();
+        }
+        else{
+            obj_bd.alert("Estatus conexión", "Error de conexión, revise que los datos sean correctos", Alert.AlertType.ERROR);
+        }
     }
 
 }

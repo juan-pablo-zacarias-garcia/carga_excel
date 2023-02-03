@@ -8,29 +8,39 @@ package com.mycompany.carga_excel.clases;
  *
  * @author Juan Pablo Zacarias
  */
-import com.mycompany.carga_excel.clases.Conexion_bd;
 import java.io.File;
 import org.apache.poi.ss.usermodel.Cell;
-import static org.apache.poi.ss.usermodel.CellType.NUMERIC;
-import static org.apache.poi.ss.usermodel.CellType.STRING;
 import org.apache.poi.ss.usermodel.Row;
 
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.ss.usermodel.DataFormatter;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import javafx.scene.control.Alert;
-import javafx.stage.StageStyle;
+import static org.apache.poi.ss.usermodel.CellType.BLANK;
+import static org.apache.poi.ss.usermodel.CellType.BOOLEAN;
+import static org.apache.poi.ss.usermodel.CellType.ERROR;
+import static org.apache.poi.ss.usermodel.CellType.FORMULA;
+import static org.apache.poi.ss.usermodel.CellType.NUMERIC;
+import static org.apache.poi.ss.usermodel.CellType.STRING;
+import static org.apache.poi.ss.usermodel.CellType._NONE;
+import org.apache.poi.ss.usermodel.DateUtil;
 
 public class Excel {
 
     //La variable items almacenará los datos de las celdas de excel
-    public ArrayList datos;
+    public ArrayList<String> datos;
     //Guarda el número de columnas de la tabla
-    int no_columns;
+    public int no_columns;
+    //Guarda la fila de ancabezados
+    public ArrayList<String> columns = new ArrayList<String>();
 
-    public void leer(File file, int no_sheet, int no_columns) {
+    
+    public void leer(File file, int no_sheet, int no_columns, int fila_encabezados) {
 
         try {
             //instancia del objeto workbook para archivos xlsx
@@ -41,50 +51,45 @@ public class Excel {
             ArrayList<String> items = new ArrayList<String>();
 
             //recorre las filas de la hoja de excel
-            for (Row row : sheet) //iteration over row using for each loop  
-            {
-                //recorre las celdas de cada fila;
-                for (Cell cell : row) {
-                    //los valores de las celdas pueden ser leidos como numéricos o string
-                    //los valores se ponen entre comillas simples y divididos por comas para generar la consulta sql
-                    if (cell.getCellType().equals(NUMERIC)) {
-                        //se guarda el valor de la celda
-                        items.add(String.valueOf(cell.getNumericCellValue()));
-                    }
-                    if (cell.getCellType().equals(STRING)) {
-                        //se guarda el valor de la celda
-                        items.add(cell.getStringCellValue());
-                    }
-
+            Row row = sheet.getRow(fila_encabezados);
+            while (row != null) {
+                for (int i = 0; i < no_columns; i++) {
+                    Cell cell = row.getCell(i);
+                    //almacena el contenido de la celda en el arraylist
+                    items.add(getStringFromCell(cell));
                 }
-
+                fila_encabezados++;
+                row = sheet.getRow(fila_encabezados);
             }
+
             //Los datos de las celdas de la hoja de excel están en el arraylist items, incluyendo los encabezados
             this.datos = items;
+            for(int i=0; i<no_columns; i++){
+                this.columns.add(this.datos.get(i));
+            }
             this.no_columns = no_columns;
 
         } catch (Exception e) {
             System.out.println("Error al leer archivo " + e);
         }
     }
-
-    public void exportar_datos(ArrayList items, int no_columns) {
+    //Método para exportar los datos del Arraylist items a la tabla de la base de datos
+    public void exportar_datos(ArrayList items, int no_columns, ArrayList<String> columns, String tablaBD) {
         //inicio la conexion para cargar los datos;
         Conexion_bd obj_bd = new Conexion_bd();
-        //completo la consulta
-        String query = "INSERT INTO empleados "
-                + "(id,"
-                + " nombre_completo,"
-                + " fecha_nacimiento,"
-                + " direccion,"
-                + " localidad,"
-                + " telefono,"
-                + " correo,"
-                + " fecha_de_alta,"
-                + " grupo_de_clientes)"
-                + "VALUES";
+        //Extraemos los nombres de las columnas
+        String cols="";
+        for(int i=0; i<columns.size(); i++){
+            cols=cols+columns.get(i)+",";
+        }
+        //terminamos de dar formato a las columnas de la consulta
+        cols = "("+cols.substring(0, cols.length() - 1)+")";
+        
+        
+        String query = "INSERT INTO "+tablaBD+" "
+                + cols;
         //se crea una conexion
-        Connection conn = obj_bd.conectar();
+        Connection conn = obj_bd.conectar("");
         //index para extraer elementos del arraylist con las celdas de excel
         //incia en no_columns para omitir la fila de los títulos
         int index_item = no_columns;
@@ -92,7 +97,9 @@ public class Excel {
         String values;
         //número de filas del documento menos la fila de encabezados
         int no_filas = (items.size() / no_columns) - 1;
-
+        //datos insertados correctamente
+        int datos_insertados =0;
+        //formamos la cadena de VALUES
         if (conn != null) {
             for (int i = 0; i < no_filas; i++) {
                 values = "";
@@ -107,20 +114,78 @@ public class Excel {
                 //se quita la última coma a values
                 values = values.substring(0, values.length() - 1);
                 //se realiza la consulta sql
-                obj_bd.insert(query + "(" + values + ")", conn);
+                System.out.println(query + " VALUES(" + values + ")");
+                ResultSet res = obj_bd.insert(query + " VALUES(" + values + ")", conn);
+                if(res!=null){
+                    datos_insertados++;
+                }
             }
             //Alerta sobre datos cargados
-            alert("Datos exportados", "Se han cargado " + no_filas + ""
+            alert("Datos exportados", "Se han cargado " + datos_insertados + ""
                     + " registros en la base de datos", Alert.AlertType.INFORMATION);
             //se reinicia el index del array list
             index_item = no_columns;
             //Cierra a conexión
             obj_bd.cerrar_conexion(conn);
-        }
-        else{
-            
+        } else {
+
         }
 
+    }
+
+    void mostrar_datos(String[] columnas, ArrayList<String> datos) {
+
+    }
+
+    //Método para devolver el valor contenido en la columna en string
+    String getStringFromCell(Cell cell) {
+
+        String cont_cell = "";
+        if (cell != null) {
+            switch (cell.getCellType()) {
+                case NUMERIC:
+                    //si el número corresponde a una fecha entonces le da formato de fecha
+                    if (DateUtil.isCellDateFormatted(cell)) {
+                        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+                        String s = sdf.format(cell.getDateCellValue());
+                        cont_cell = s;
+                    } else {
+                        cont_cell = (String.valueOf(cell.getNumericCellValue()));
+                    }
+                    break;
+                case STRING:
+                    cont_cell = (cell.getStringCellValue());
+                    break;
+                case BOOLEAN:
+                    cont_cell = (String.valueOf(cell.getBooleanCellValue()));
+                    break;
+                case FORMULA:
+                    switch (cell.getCachedFormulaResultType()) {
+                        case NUMERIC:
+                            cont_cell = (String.valueOf(cell.getNumericCellValue()));
+                            break;
+                        case STRING:
+                            cont_cell = (cell.getStringCellValue());
+                            break;
+                    }
+                    break;
+                case ERROR:
+                    cont_cell = ("vacia");
+                    break;
+                case BLANK:
+                    cont_cell = ("vacia");
+                    break;
+                case _NONE:
+                    cont_cell = ("vacia");
+                    break;
+                default:
+                    cont_cell = ("vacia");
+                    break;
+            }
+        } else {
+            cont_cell = ("vacia");
+        }
+        return cont_cell;
     }
 
     //Método para mostrar alertas

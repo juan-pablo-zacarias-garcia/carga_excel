@@ -99,7 +99,6 @@ public class DatosBD {
             Alg_enc oenc = new Alg_enc();
             //cuando encriptamos nos devuelve un arreglo de bytes que es el texto cifrado, este hay que guardarlo en el archivo
             datos_enc = oenc.encript(datos, llave);
-            System.out.println("DatosBD/actualizar_datos_conexion/datos encriptados: " + datos_enc);
             // Si el archivo no existe es creado
             if (!env_file.exists()) {
                 env_file.createNewFile();

@@ -27,7 +27,7 @@ public class Conexion_bd {
         datos_bd = new DatosBD();
     }
 
-    public Connection conectar() {
+    public Connection conectar(String url) {
        
         String connectionUrl
                 = "jdbc:sqlserver://"+datos_bd.host+"\\"+datos_bd.instance+";"
@@ -41,7 +41,7 @@ public class Conexion_bd {
         try {
             //establece la conexión con la bd
             Connection connection = DriverManager.getConnection(connectionUrl);
-            System.out.println("Conexión establecida");
+            System.out.println("COnexion_bd/conectar/Conexión establecida");
             return connection;
 
         } catch (Exception e) {

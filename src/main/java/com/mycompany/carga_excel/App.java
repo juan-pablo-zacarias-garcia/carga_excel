@@ -21,6 +21,7 @@ public class App extends Application {
         stage.setTitle("Cargar datos Excel");
         Image icon = new Image("file:src/main/resources/com/mycompany/carga_excel/img/agrnieto.png");
         stage.getIcons().add(icon);
+        //stage.setFullScreen(true);
    
         stage.show();
     }
