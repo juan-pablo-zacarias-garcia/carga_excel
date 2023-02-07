@@ -17,8 +17,12 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.List;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.scene.control.Alert;
 import static org.apache.poi.ss.usermodel.CellType.BLANK;
 import static org.apache.poi.ss.usermodel.CellType.BOOLEAN;
@@ -31,6 +35,8 @@ import org.apache.poi.ss.usermodel.DateUtil;
 
 public class Excel {
 
+    //instancia del objeto workbook para archivos xlsx, es el libro con el que se trabajará
+    private XSSFWorkbook wb;
     //La variable items almacenará los datos de las celdas de excel
     public ArrayList<String> datos;
     //Guarda el número de columnas de la tabla
@@ -39,12 +45,13 @@ public class Excel {
     //Guarda la fila de ancabezados
     public ArrayList<String> columns = new ArrayList<String>();
 
-    
-    public void leer(File file, int no_sheet, int no_columns, int fila_encabezados) {
+    //formato de decimales
+    DecimalFormat df = new DecimalFormat("#.00");
 
+    public void leer(File file, int no_sheet, int no_columns, int fila_encabezados) {
         try {
             //instancia del objeto workbook para archivos xlsx
-            XSSFWorkbook wb = new XSSFWorkbook(file);
+            wb = new XSSFWorkbook(file);
             //instancia del objeto sheet para archivos xlsx
             XSSFSheet sheet = wb.getSheetAt(no_sheet);
             //arraylist para guardar los datos de las celdas de excel
@@ -67,7 +74,7 @@ public class Excel {
 
             //Los datos de las celdas de la hoja de excel están en el arraylist items, incluyendo los encabezados
             this.datos = items;
-            for(int i=0; i<no_columns; i++){
+            for (int i = 0; i < no_columns; i++) {
                 this.columns.add(this.datos.get(i));
             }
             this.no_columns = no_columns;
@@ -76,21 +83,23 @@ public class Excel {
             System.out.println("Error al leer archivo " + e);
         }
     }
+
     //Método para exportar los datos del Arraylist items a la tabla de la base de datos
     public void exportar_datos(ArrayList items, int no_columns, ArrayList<String> columns, String tablaBD) {
         //inicio la conexion para cargar los datos;
         Conexion_bd obj_bd = new Conexion_bd();
+        //creamos objeto de Consultas
+        Consultas querys = new Consultas();
         //Extraemos los nombres de las columnas
-        String cols="";
-        for(int i=0; i<columns.size(); i++){
-            cols=cols+columns.get(i)+",";
+        String cols = "";
+        for (int i = 0; i < columns.size(); i++) {
+            cols = cols + columns.get(i) + ",";
         }
         //terminamos de dar formato a las columnas de la consulta
-        cols = "("+cols.substring(0, cols.length() - 1)+")";
-        
-        
-        String query = "INSERT INTO "+tablaBD+" "
-                + cols;
+        cols = "(" + cols.substring(0, cols.length() - 1) + ")";
+
+        String query = "INSERT INTO " + tablaBD + " "
+                + querys.columns;
         //se crea una conexion
         Connection conn = obj_bd.conectar("");
         //index para extraer elementos del arraylist con las celdas de excel
@@ -101,7 +110,7 @@ public class Excel {
         //número de filas del documento menos la fila de encabezados
         int no_filas = (items.size() / no_columns) - 1;
         //datos insertados correctamente
-        int datos_insertados =0;
+        int datos_insertados = 0;
         //formamos la cadena de VALUES
         if (conn != null) {
             for (int i = 0; i < no_filas; i++) {
@@ -117,14 +126,13 @@ public class Excel {
                 //se quita la última coma a values
                 values = values.substring(0, values.length() - 1);
                 //se realiza la consulta sql
-                System.out.println(query + " VALUES(" + values + ")");
                 ResultSet res = obj_bd.insert(query + " VALUES(" + values + ")", conn);
-                if(res!=null){
+                if (res != null) {
                     datos_insertados++;
                 }
             }
             //Alerta sobre datos cargados
-            alert("Datos exportados", "Se han cargado " + datos_insertados + ""
+            alert("Datos exportados", "Se han cargado " + datos_insertados + " de " + no_filas
                     + " registros en la base de datos", Alert.AlertType.INFORMATION);
             //se reinicia el index del array list
             index_item = no_columns;
@@ -136,7 +144,14 @@ public class Excel {
 
     }
 
-
+    //Método para obtener las hojas disponibles del archivo de Excel
+    public ArrayList<String> getSheets() {
+        ArrayList<String> sheetNames = new ArrayList<String>();
+        for (int i = 0; i < wb.getNumberOfSheets(); i++) {
+            sheetNames.add(wb.getSheetName(i));
+        }
+        return sheetNames;
+    }
 
     //Método para devolver el valor contenido en la columna en string
     String getStringFromCell(Cell cell) {
@@ -152,8 +167,12 @@ public class Excel {
                         cont_cell = s;
                     } else {
                         cell.setCellType(STRING);
-                        //cont_cell = (String.valueOf(cell.getNumericCellValue()));
-                        cont_cell = (cell.getStringCellValue());
+                        String aux = cell.getStringCellValue();
+                        //Lo convertimos a número para formatearlo con dos decimales
+                        double num_f = Double.parseDouble(aux);
+                        aux = df.format(num_f);
+                        //Se guarda el dato formateado a 2 decimales
+                        cont_cell = (aux);
                     }
                     break;
                 case STRING:
@@ -165,7 +184,7 @@ public class Excel {
                 case FORMULA:
                     switch (cell.getCachedFormulaResultType()) {
                         case NUMERIC:
-                            cont_cell = (String.valueOf(cell.getNumericCellValue()));
+                            cont_cell = (String.valueOf(df.format(cell.getNumericCellValue())));
                             break;
                         case STRING:
                             cont_cell = (cell.getStringCellValue());

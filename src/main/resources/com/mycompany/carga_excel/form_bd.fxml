@@ -13,15 +13,19 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
-<AnchorPane id="AnchorPane" prefHeight="500.0" prefWidth="465.0" style="-fx-background-color: #A4F8E4;" styleClass="mainFxmlClass" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mycompany.carga_excel.Form_bdController">
+<AnchorPane id="AnchorPane" prefHeight="500.0" prefWidth="465.0" styleClass="mainFxmlClass" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mycompany.carga_excel.Form_bdController">
     <stylesheets>
         <URL value="@/styles/style.css" />
     </stylesheets>
    <children>
       <VBox alignment="CENTER" prefHeight="500.0" prefWidth="465.0">
          <children>
-            <Label text="Configuración" />
+            <Label text="Configuración">
+               <font>
+                  <Font size="20.0" />
+               </font></Label>
             <GridPane prefHeight="277.0" prefWidth="394.0">
               <columnConstraints>
                 <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="199.0" minWidth="10.0" prefWidth="146.0" />
@@ -99,16 +103,16 @@
                <children>
                   <Button layoutX="146.0" layoutY="17.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#actualizar_datos" text="Actualizar" GridPane.columnIndex="1">
                      <GridPane.margin>
-                        <Insets />
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                      </GridPane.margin></Button>
                   <Button fx:id="aceptar" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#cerrar_ventana" text="Salir" GridPane.columnIndex="2">
                      <GridPane.margin>
-                        <Insets />
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                      </GridPane.margin>
                   </Button>
                   <Button fx:id="probar_conexion" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#probar_conexion" text="Probar conexión">
                      <GridPane.margin>
-                        <Insets />
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                      </GridPane.margin>
                   </Button>
                </children>

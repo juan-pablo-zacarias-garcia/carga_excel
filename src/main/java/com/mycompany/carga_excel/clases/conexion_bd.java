@@ -61,6 +61,7 @@ public class Conexion_bd {
             resultSet = prepsInsertProduct.getGeneratedKeys();
             return resultSet;
         } catch (Exception e) {
+            System.out.println(query);
             System.out.println("Conexion_bd/insert/Error en consulta " + e);
             return null;
         }

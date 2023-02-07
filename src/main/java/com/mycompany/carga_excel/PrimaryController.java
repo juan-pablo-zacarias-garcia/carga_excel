@@ -4,14 +4,22 @@ import com.mycompany.carga_excel.clases.Excel;
 import javafx.fxml.FXML;
 import java.io.File;
 import java.io.IOException;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
@@ -22,6 +30,7 @@ public class PrimaryController {
     //globales
     String ruta_archivo = null;
     File archivo = null;
+    int no_sheet = 12, row_headers=1, no_colums=69; 
     Excel doc_excel = new Excel();
 
     //FXML
@@ -46,9 +55,7 @@ public class PrimaryController {
             try {
                 nom_archivo.setText(file.getPath());
                 archivo = file;
-                //Lee el archivo en la hoja 0, la tabla de esa hoja contiene 9 columnas
-                //re.leer(archivo, 12, 69, 0);
-                doc_excel.leer(archivo, 12, 69, 1);
+                doc_excel.leer(archivo, no_sheet, no_colums, row_headers);
                 mostrar_datos();
             } catch (Exception e) {
                 System.out.println("PrimaryController/abrir_archivo/ " + e);
@@ -62,7 +69,6 @@ public class PrimaryController {
 
     //Método para mostrar los datos en pantalla
     void mostrar_datos() {
-
         int index_datos = 0;
         for (int j = 0; j < doc_excel.no_columns; j++) {
             ColumnConstraints column = new ColumnConstraints(100);
@@ -78,12 +84,57 @@ public class PrimaryController {
         }
     }
 
+    //Selecciona la hoja de excel, la fila conde inician los encabezados de la tabla y el número de columnas de la tabla
+    @FXML
+    void seleccionar_datos() {
+        //se abre una nueva ventana
+        Stage primaryStage = new Stage();
+        primaryStage.setTitle("Seleccionar datos de Excel");
+        
+        //Se contrulle la interfaz de manera manual
+        //contenedores
+        AnchorPane root = new AnchorPane();
+        GridPane grid = new GridPane();
+        
+        //control
+        ComboBox combo_sheets = new ComboBox();
+        combo_sheets.getItems().addAll(doc_excel.getSheets());
+        TextField tf_row_headers = new TextField();
+        TextField tf_no_columns = new TextField();
+        grid.add(new Label("Hoja: "),0,0);
+        grid.add(new Label("Fila de encabezados: "),0,1);
+        grid.add(new Label("Número de columnas: "),0,2);
+        grid.add(combo_sheets, 1, 0);
+        grid.add(tf_row_headers, 1, 1);
+        grid.add(tf_no_columns, 1, 2);
+        Button btn = new Button();
+        btn.setText("Aceptar");
+        btn.setOnAction(new EventHandler<ActionEvent>() {
+ 
+            @Override
+            public void handle(ActionEvent event) {
+                //Se actualizan las variables de la clase PrimaryController
+               no_sheet = combo_sheets.getSelectionModel().getSelectedIndex();
+               row_headers = Integer.parseInt(tf_row_headers.getText());
+               no_colums = Integer.parseInt(tf_no_columns.getText());
+               
+                
+            }
+        });
+        
+        
+        VBox vbox = new VBox(grid, btn);
+        root.getChildren().add(vbox);
+        primaryStage.setScene(new Scene(root, 300, 250));
+        primaryStage.show();
+    }
+
     //Lee el archivo de excel cargado y lo exporta a la base de datos
     @FXML
     void exportar() {
         if (archivo != null) {
             //exporta los datos, los datos se generan al leer el archivo
-            doc_excel.exportar_datos(doc_excel.datos, doc_excel.no_columns, doc_excel.columns, "empleados");
+            doc_excel.exportar_datos(doc_excel.datos, doc_excel.no_columns, doc_excel.columns, "tablas");
             nom_archivo.setText("");
             archivo = null;
         } else {
@@ -106,7 +157,6 @@ public class PrimaryController {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 
     @FXML
@@ -123,3 +173,4 @@ public class PrimaryController {
         alerta_archivo.showAndWait();
     }
 }
+
