@@ -8,16 +8,12 @@ package com.mycompany.carga_excel.clases;
  *
  * @author Juan Pablo Zacarias
  */
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.ResultSet;
-import java.util.Scanner;
 import javafx.scene.control.Alert;
 
 public class Conexion_bd {

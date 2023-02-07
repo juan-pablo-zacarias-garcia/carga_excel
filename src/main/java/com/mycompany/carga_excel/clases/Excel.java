@@ -35,7 +35,8 @@ public class Excel {
     //La variable items almacenará los datos de las celdas de excel
     public ArrayList<String> datos;
     //Guarda el número de columnas de la tabla
-    public int no_columns;
+    public int no_columns = 0;
+    public int no_rows = 0;
     //Guarda la fila de ancabezados
     public ArrayList<String> columns = new ArrayList<String>();
 
@@ -58,7 +59,10 @@ public class Excel {
                     //almacena el contenido de la celda en el arraylist
                     items.add(getStringFromCell(cell));
                 }
+                //aumenta el index de las filas
                 fila_encabezados++;
+                this.no_rows++;
+                //actualiza para leer la nueva fila
                 row = sheet.getRow(fila_encabezados);
             }
 
@@ -133,9 +137,7 @@ public class Excel {
 
     }
 
-    void mostrar_datos(String[] columnas, ArrayList<String> datos) {
 
-    }
 
     //Método para devolver el valor contenido en la columna en string
     String getStringFromCell(Cell cell) {

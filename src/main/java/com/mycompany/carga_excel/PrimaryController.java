@@ -5,6 +5,7 @@ import javafx.fxml.FXML;
 import java.io.File;
 import java.io.IOException;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -12,6 +13,12 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.CornerRadii;
+import javafx.scene.layout.GridPane;
+import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
@@ -28,7 +35,7 @@ public class PrimaryController {
     @FXML
     Label nom_archivo;
     @FXML
-    TableView tabla;
+    GridPane grid;
 
     @FXML
     void abrir_archivo() {
@@ -49,6 +56,7 @@ public class PrimaryController {
                 //Lee el archivo en la hoja 0, la tabla de esa hoja contiene 9 columnas
                 //re.leer(archivo, 12, 69, 0);
                 re.leer(archivo, 12, 69, 1);
+                mostrar_datos();
             } catch (Exception e) {
                 System.out.println("PrimaryController/abrir_archivo/ " + e);
             }
@@ -59,10 +67,21 @@ public class PrimaryController {
         }
     }
 
-    @FXML
     void mostrar_datos() {
-        TableColumn ejemplo = new TableColumn("ejemplo");
-        tabla.getColumns().addAll(ejemplo);
+
+        int index_datos = 0;
+        for (int j = 0; j < re.no_columns; j++) {
+            ColumnConstraints column = new ColumnConstraints(100);
+            grid.getColumnConstraints().add(column);
+        }
+
+        for (int i = 0; i < re.no_rows; i++) {
+            for (int j = 0; j < re.no_columns; j++) {
+                Label nodo = new Label(re.datos.get(index_datos));
+                grid.add(nodo, j, i);
+                index_datos++;
+            }
+        }
     }
 
     //Lee el archivo de excel cargado y lo exporta a la base de datos
