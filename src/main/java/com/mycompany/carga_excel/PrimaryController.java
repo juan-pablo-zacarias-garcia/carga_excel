@@ -5,20 +5,13 @@ import javafx.fxml.FXML;
 import java.io.File;
 import java.io.IOException;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Insets;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.ColumnConstraints;
-import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.GridPane;
-import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
@@ -29,7 +22,7 @@ public class PrimaryController {
     //globales
     String ruta_archivo = null;
     File archivo = null;
-    Excel re = new Excel();
+    Excel doc_excel = new Excel();
 
     //FXML
     @FXML
@@ -55,7 +48,7 @@ public class PrimaryController {
                 archivo = file;
                 //Lee el archivo en la hoja 0, la tabla de esa hoja contiene 9 columnas
                 //re.leer(archivo, 12, 69, 0);
-                re.leer(archivo, 12, 69, 1);
+                doc_excel.leer(archivo, 12, 69, 1);
                 mostrar_datos();
             } catch (Exception e) {
                 System.out.println("PrimaryController/abrir_archivo/ " + e);
@@ -67,17 +60,18 @@ public class PrimaryController {
         }
     }
 
+    //Método para mostrar los datos en pantalla
     void mostrar_datos() {
 
         int index_datos = 0;
-        for (int j = 0; j < re.no_columns; j++) {
+        for (int j = 0; j < doc_excel.no_columns; j++) {
             ColumnConstraints column = new ColumnConstraints(100);
             grid.getColumnConstraints().add(column);
         }
 
-        for (int i = 0; i < re.no_rows; i++) {
-            for (int j = 0; j < re.no_columns; j++) {
-                Label nodo = new Label(re.datos.get(index_datos));
+        for (int i = 0; i < doc_excel.no_rows; i++) {
+            for (int j = 0; j < doc_excel.no_columns; j++) {
+                Label nodo = new Label(doc_excel.datos.get(index_datos));
                 grid.add(nodo, j, i);
                 index_datos++;
             }
@@ -89,7 +83,7 @@ public class PrimaryController {
     void exportar() {
         if (archivo != null) {
             //exporta los datos, los datos se generan al leer el archivo
-            re.exportar_datos(re.datos, 69, re.columns, "empleados");
+            doc_excel.exportar_datos(doc_excel.datos, doc_excel.no_columns, doc_excel.columns, "empleados");
             nom_archivo.setText("");
             archivo = null;
         } else {
@@ -97,6 +91,7 @@ public class PrimaryController {
         }
     }
 
+    //Método para abrir el formulario para la configuración de conexión con la BD
     @FXML
     void config_bd() {
         //se abre una nueva ventana

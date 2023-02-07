@@ -14,7 +14,6 @@ import org.apache.poi.ss.usermodel.Row;
 
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.apache.poi.ss.usermodel.DataFormatter;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -152,7 +151,9 @@ public class Excel {
                         String s = sdf.format(cell.getDateCellValue());
                         cont_cell = s;
                     } else {
-                        cont_cell = (String.valueOf(cell.getNumericCellValue()));
+                        cell.setCellType(STRING);
+                        //cont_cell = (String.valueOf(cell.getNumericCellValue()));
+                        cont_cell = (cell.getStringCellValue());
                     }
                     break;
                 case STRING:
