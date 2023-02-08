@@ -20,9 +20,6 @@ import java.sql.ResultSet;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.List;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.scene.control.Alert;
 import static org.apache.poi.ss.usermodel.CellType.BLANK;
 import static org.apache.poi.ss.usermodel.CellType.BOOLEAN;
@@ -47,11 +44,19 @@ public class Excel {
 
     //formato de decimales
     DecimalFormat df = new DecimalFormat("#.00");
-
-    public void leer(File file, int no_sheet, int no_columns, int fila_encabezados) {
-        try {
-            //instancia del objeto workbook para archivos xlsx
+    
+    public void abrir(File file){
+        try{
+             //instancia del objeto workbook para archivos xlsx
             wb = new XSSFWorkbook(file);
+        }catch(Exception e){
+            System.out.println("Excel/abrir/Error al leer archivo " + e);
+        }
+    }
+    //Lee los datos para exportarlos
+    public void leer(int no_sheet, int no_columns, int fila_encabezados) {
+        try {
+            this.no_rows=0;
             //instancia del objeto sheet para archivos xlsx
             XSSFSheet sheet = wb.getSheetAt(no_sheet);
             //arraylist para guardar los datos de las celdas de excel
@@ -80,9 +85,13 @@ public class Excel {
             this.no_columns = no_columns;
 
         } catch (Exception e) {
-            System.out.println("Error al leer archivo " + e);
+            System.out.println("Excel/leer/Error al leer archivo " + e);
         }
     }
+    
+    
+    
+    
 
     //Método para exportar los datos del Arraylist items a la tabla de la base de datos
     public void exportar_datos(ArrayList items, int no_columns, ArrayList<String> columns, String tablaBD) {

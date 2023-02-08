@@ -1,12 +1,22 @@
 package com.mycompany.carga_excel;
 
+import com.mycompany.carga_excel.clases.Conexion_bd;
+import com.mycompany.carga_excel.clases.Consultas;
 import com.mycompany.carga_excel.clases.Excel;
 import javafx.fxml.FXML;
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -14,30 +24,32 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
-public class PrimaryController {
+public class PrimaryController implements Initializable {
 
     //globales
     String ruta_archivo = null;
     File archivo = null;
-    int no_sheet = 12, row_headers=1, no_colums=69; 
+    int no_sheet = 0, row_headers = 0, no_colums = 0;
     Excel doc_excel = new Excel();
 
     //FXML
     @FXML
     Label nom_archivo;
     @FXML
-    GridPane grid;
+    VBox vb1;
+    @FXML
+    Button btn_seleccionar_datos, btn_exportar;
 
     @FXML
     void abrir_archivo() {
@@ -52,11 +64,11 @@ public class PrimaryController {
         File file = chooser.showOpenDialog(stage);
 
         if (file != null) {
+            btn_seleccionar_datos.setDisable(false);
             try {
                 nom_archivo.setText(file.getPath());
                 archivo = file;
-                doc_excel.leer(archivo, no_sheet, no_colums, row_headers);
-                mostrar_datos();
+                doc_excel.abrir(file);
             } catch (Exception e) {
                 System.out.println("PrimaryController/abrir_archivo/ " + e);
             }
@@ -70,6 +82,8 @@ public class PrimaryController {
     //Método para mostrar los datos en pantalla
     void mostrar_datos() {
         int index_datos = 0;
+
+        GridPane grid = new GridPane();
         for (int j = 0; j < doc_excel.no_columns; j++) {
             ColumnConstraints column = new ColumnConstraints(100);
             grid.getColumnConstraints().add(column);
@@ -82,6 +96,14 @@ public class PrimaryController {
                 index_datos++;
             }
         }
+
+        //carga el grid con los datos al ScrollPane y luego al Pane
+        ListView lv = new ListView();
+        lv.getItems().addAll(grid);
+        //Limpia los datos mostrados y los vuelve a cargar
+        vb1.getChildren().clear();
+        vb1.getChildren().add(lv);
+
     }
 
     //Selecciona la hoja de excel, la fila conde inician los encabezados de la tabla y el número de columnas de la tabla
@@ -90,53 +112,107 @@ public class PrimaryController {
         //se abre una nueva ventana
         Stage primaryStage = new Stage();
         primaryStage.setTitle("Seleccionar datos de Excel");
-        
+
         //Se contrulle la interfaz de manera manual
         //contenedores
         AnchorPane root = new AnchorPane();
         GridPane grid = new GridPane();
-        
+
         //control
         ComboBox combo_sheets = new ComboBox();
         combo_sheets.getItems().addAll(doc_excel.getSheets());
         TextField tf_row_headers = new TextField();
         TextField tf_no_columns = new TextField();
-        grid.add(new Label("Hoja: "),0,0);
-        grid.add(new Label("Fila de encabezados: "),0,1);
-        grid.add(new Label("Número de columnas: "),0,2);
+        TextField tf_nom_tabla = new TextField();
+
+        grid.add(new Label("Hoja: "), 0, 0);
+        grid.add(new Label("Fila de encabezados: "), 0, 1);
+        grid.add(new Label("Número de columnas: "), 0, 2);
         grid.add(combo_sheets, 1, 0);
         grid.add(tf_row_headers, 1, 1);
         grid.add(tf_no_columns, 1, 2);
         Button btn = new Button();
         btn.setText("Aceptar");
         btn.setOnAction(new EventHandler<ActionEvent>() {
- 
+
             @Override
             public void handle(ActionEvent event) {
                 //Se actualizan las variables de la clase PrimaryController
-               no_sheet = combo_sheets.getSelectionModel().getSelectedIndex();
-               row_headers = Integer.parseInt(tf_row_headers.getText());
-               no_colums = Integer.parseInt(tf_no_columns.getText());
-               
-                
+                no_sheet = combo_sheets.getSelectionModel().getSelectedIndex();
+                row_headers = Integer.parseInt(tf_row_headers.getText());
+                no_colums = Integer.parseInt(tf_no_columns.getText());
+                doc_excel.leer(no_sheet, no_colums, row_headers);
+                System.out.println();
+                mostrar_datos();
+                btn_exportar.setDisable(false);
             }
         });
-        
-        
+
         VBox vbox = new VBox(grid, btn);
         root.getChildren().add(vbox);
         primaryStage.setScene(new Scene(root, 300, 250));
         primaryStage.show();
     }
 
-    //Lee el archivo de excel cargado y lo exporta a la base de datos
+    //Selecciona la tabla de la base de datos a la que se insertará la información
     @FXML
-    void exportar() {
+    void seleccionar_tabla_bd() {
+
+        //se abre una nueva ventana
+        Stage primaryStage = new Stage();
+        primaryStage.setTitle("Seleccionar tabla");
+
+        //Se contrulle la interfaz de manera manual
+        //contenedores
+        AnchorPane root = new AnchorPane();
+        GridPane grid = new GridPane();
+
+        //control
+        ComboBox combo_tables = new ComboBox();
+        grid.add(new Label("Exportar a tabla: "), 0, 0);
+        grid.add(combo_tables, 1, 0);
+        Button btn = new Button();
+        btn.setText("Aceptar");
+        //recuperar datos de la bd
+        try {
+            Conexion_bd conn = new Conexion_bd();
+            Consultas queries = new Consultas();
+            ResultSet tablas = conn.query(queries.tablas_bd, conn.conectar(""));
+            while (tablas.next()) {
+                String item = tablas.getString("name");
+                combo_tables.getItems().add(item);
+            }
+        } catch (Exception e) {
+            System.out.println("PrimaryController/Seleccionar_tabla_bd/ " + e);
+        }
+
+        btn.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                String tabla = combo_tables.getValue().toString();
+                System.out.println("Tabla seleccionada: " + tabla);
+                exportar(tabla);
+            }
+        });
+
+        VBox vbox = new VBox(grid, btn);
+        root.getChildren().add(vbox);
+        primaryStage.setScene(new Scene(root, 300, 250));
+        primaryStage.show();
+
+    }
+
+    //Lee el archivo de excel cargado y lo exporta a la base de datos
+    void exportar(String tabla_bd) {
         if (archivo != null) {
             //exporta los datos, los datos se generan al leer el archivo
-            doc_excel.exportar_datos(doc_excel.datos, doc_excel.no_columns, doc_excel.columns, "tablas");
+            doc_excel.exportar_datos(doc_excel.datos, doc_excel.no_columns, doc_excel.columns, tabla_bd);
+            //Se reinician las variables necesarias
             nom_archivo.setText("");
             archivo = null;
+            vb1.getChildren().clear();
+            btn_seleccionar_datos.setDisable(true);
+            btn_exportar.setDisable(true);
         } else {
             alert("Archivo no cargado", "No se ha seleccionado ningun archivo", AlertType.WARNING);
         }
@@ -172,5 +248,10 @@ public class PrimaryController {
         alerta_archivo.initStyle(StageStyle.UTILITY);
         alerta_archivo.showAndWait();
     }
-}
 
+    @Override
+    public void initialize(URL url, ResourceBundle rb) {
+        btn_seleccionar_datos.setDisable(true);
+        btn_exportar.setDisable(true);
+    }
+}

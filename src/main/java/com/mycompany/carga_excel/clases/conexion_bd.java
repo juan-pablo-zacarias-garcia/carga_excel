@@ -66,6 +66,17 @@ public class Conexion_bd {
             return null;
         }
     }
+    
+    public ResultSet query(String query, Connection conn){
+        try{
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(query);
+            return rs;
+        }catch(Exception e){
+            System.out.println("Conexion_bd/query/"+e);
+            return null;
+        }
+    }
 
     public void cerrar_conexion(Connection conn) {
         try {
