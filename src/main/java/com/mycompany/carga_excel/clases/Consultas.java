@@ -4,11 +4,24 @@
  */
 package com.mycompany.carga_excel.clases;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+
 /**
  *
  * @author ELIZABETH
  */
 public class Consultas {
+    
+    public Consultas(){
+        
+    }
+    
+    
+    
     public String columns = "(" +
 "MES1 ,SEMANA1 ,TABLA1 ,PRODUCTO1 ,CODIGO1," +
 "HECTAREAS1 ,RANCHO1 ,OBSERVACIONES1 ,REND_KG_X_HA1 ," +
@@ -24,4 +37,11 @@ public class Consultas {
 "VENTAS_AVALON1 ,COM_MONTERREY1 ,COM_GUADALAJARA1 ,VENTAS_ESA_FRESH1 ,OTROS_CLIENTES1 ," +
 "VENTAS_TOTALES1 ,I1 ,UTILIDAD_O_PERDIDA1)";
     public String tablas_bd = "Select name from sysobjects where type=\'U\';";
+    
+    public String headers_table_db = "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tablas';";
+    public String getHeadersTable(String table){
+        
+        return null;
+    }
+    
 }

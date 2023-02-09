@@ -53,7 +53,7 @@ public class Excel {
             System.out.println("Excel/abrir/Error al leer archivo " + e);
         }
     }
-    //Lee los datos para exportarlos
+    //Lee los datos de excel para exportarlos
     public void leer(int no_sheet, int no_columns, int fila_encabezados) {
         try {
             this.no_rows=0;

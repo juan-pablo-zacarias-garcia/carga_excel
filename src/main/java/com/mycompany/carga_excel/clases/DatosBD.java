@@ -24,8 +24,8 @@ public class DatosBD {
     public String password;
     //ruta del archivo
     private String urlf = "src/main/java/env.txt";
-    //palabra
-    String llave = "Estaesunallaveen64";
+    //palabra clave par aencriptar los datos
+    String llave = "agricolanieto290699";
 
     DatosBD() {
         //inicializa las variables, después si hay algo en el archivo actualiza las variables

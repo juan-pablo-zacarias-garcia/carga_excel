@@ -7,12 +7,9 @@ import javafx.fxml.FXML;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.sql.Connection;
 import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ResourceBundle;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
@@ -51,6 +48,7 @@ public class PrimaryController implements Initializable {
     @FXML
     Button btn_seleccionar_datos, btn_exportar;
 
+    //Método par abrir el archivo con los datos de conexion a la bd
     @FXML
     void abrir_archivo() {
 
@@ -121,6 +119,8 @@ public class PrimaryController implements Initializable {
         //control
         ComboBox combo_sheets = new ComboBox();
         combo_sheets.getItems().addAll(doc_excel.getSheets());
+        combo_sheets.getSelectionModel().select(0);
+        
         TextField tf_row_headers = new TextField();
         TextField tf_no_columns = new TextField();
         TextField tf_nom_tabla = new TextField();
@@ -142,7 +142,6 @@ public class PrimaryController implements Initializable {
                 row_headers = Integer.parseInt(tf_row_headers.getText());
                 no_colums = Integer.parseInt(tf_no_columns.getText());
                 doc_excel.leer(no_sheet, no_colums, row_headers);
-                System.out.println();
                 mostrar_datos();
                 btn_exportar.setDisable(false);
             }
@@ -172,26 +171,37 @@ public class PrimaryController implements Initializable {
         grid.add(new Label("Exportar a tabla: "), 0, 0);
         grid.add(combo_tables, 1, 0);
         Button btn = new Button();
-        btn.setText("Aceptar");
+        btn.setText("Exportar datos");
         //recuperar datos de la bd
         try {
-            Conexion_bd conn = new Conexion_bd();
+            Conexion_bd obj_bd = new Conexion_bd();
             Consultas queries = new Consultas();
-            ResultSet tablas = conn.query(queries.tablas_bd, conn.conectar(""));
+            Connection  conn = obj_bd.conectar("");
+            
+            ResultSet tablas = obj_bd.query(queries.tablas_bd, conn);
+            
             while (tablas.next()) {
                 String item = tablas.getString("name");
                 combo_tables.getItems().add(item);
             }
+            //Cerramos la conexión
+            conn.close();
+            //seleccionamos el item 1 por default
+            combo_tables.getSelectionModel().select(0);
         } catch (Exception e) {
             System.out.println("PrimaryController/Seleccionar_tabla_bd/ " + e);
         }
-
+        //Cuando presiona el boton exporta los datos a la tabla seleccionada
         btn.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 String tabla = combo_tables.getValue().toString();
-                System.out.println("Tabla seleccionada: " + tabla);
-                exportar(tabla);
+                //Si se seleccionó una tabla se exportan los datos, si no se manda una alerta
+                    //Exporta los datos
+                    exportar(tabla);
+                    //Cierra la ventana
+                    Stage stage = (Stage)btn.getScene().getWindow();
+                    stage.close();
             }
         });
 
