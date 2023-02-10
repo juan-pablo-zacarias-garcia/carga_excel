@@ -107,8 +107,9 @@ public class Excel {
         //terminamos de dar formato a las columnas de la consulta
         cols = "(" + cols.substring(0, cols.length() - 1) + ")";
 
-        String query = "INSERT INTO " + tablaBD + " "
-                + querys.columns;
+//        String query = "INSERT INTO " + tablaBD + " "
+//                + querys.columns;
+String query = "INSERT INTO "+tablaBD +" "+ querys.getHeadersTable(tablaBD);
         //se crea una conexion
         Connection conn = obj_bd.conectar("");
         //index para extraer elementos del arraylist con las celdas de excel
