@@ -89,7 +89,7 @@ public class PrimaryController implements Initializable {
 
         for (int i = 0; i < doc_excel.no_rows; i++) {
             for (int j = 0; j < doc_excel.no_columns; j++) {
-                Label nodo = new Label(doc_excel.datos.get(index_datos));
+                Label nodo = new Label(doc_excel.datos.get(index_datos).toString());
                 grid.add(nodo, j, i);
                 index_datos++;
             }

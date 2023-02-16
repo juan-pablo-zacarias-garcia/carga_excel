@@ -35,7 +35,7 @@ public class Excel {
     //instancia del objeto workbook para archivos xlsx, es el libro con el que se trabajará
     private XSSFWorkbook wb;
     //La variable items almacenará los datos de las celdas de excel
-    public ArrayList<String> datos;
+    public ArrayList<Object> datos;
     //Guarda el número de columnas de la tabla
     public int no_columns = 0;
     public int no_rows = 0;
@@ -60,7 +60,7 @@ public class Excel {
             //instancia del objeto sheet para archivos xlsx
             XSSFSheet sheet = wb.getSheetAt(no_sheet);
             //arraylist para guardar los datos de las celdas de excel
-            ArrayList<String> items = new ArrayList<String>();
+            ArrayList<Object> items = new ArrayList<Object>();
 
             //recorre las filas de la hoja de excel
             Row row = sheet.getRow(fila_encabezados);
@@ -68,7 +68,7 @@ public class Excel {
                 for (int i = 0; i < no_columns; i++) {
                     Cell cell = row.getCell(i);
                     //almacena el contenido de la celda en el arraylist
-                    items.add(getStringFromCell(cell));
+                    items.add(getValueFromCell(cell));
                 }
                 //aumenta el index de las filas
                 fila_encabezados++;
@@ -80,7 +80,7 @@ public class Excel {
             //Los datos de las celdas de la hoja de excel están en el arraylist items, incluyendo los encabezados
             this.datos = items;
             for (int i = 0; i < no_columns; i++) {
-                this.columns.add(this.datos.get(i));
+                this.columns.add(this.datos.get(i).toString());
             }
             this.no_columns = no_columns;
 
@@ -128,7 +128,14 @@ String query = "INSERT INTO "+tablaBD +" "+ querys.getHeadersTable(tablaBD);
                 //se extraen los elementos del arraylist dependiendo el número de columnas y se les da formato
                 for (int j = 0; j < no_columns; j++) {
                     if (index_item < items.size()) {
-                        values = values + "\'" + items.get(index_item) + "\',";
+                        try{
+                            //Si s puede convertir a número etonces lo guarda como número
+                            float valorCelda = Float.parseFloat(items.get(index_item).toString());
+                            values = values + items.get(index_item) + ",";
+                        }catch(Exception e){
+                            //Si no, lo guarda como String
+                         values = values + "\'" + items.get(index_item) + "\',";   
+                        }
                         //index del array list
                         index_item++;
                     }
@@ -164,7 +171,7 @@ String query = "INSERT INTO "+tablaBD +" "+ querys.getHeadersTable(tablaBD);
     }
 
     //Método para devolver el valor contenido en la columna en string
-    String getStringFromCell(Cell cell) {
+    String getValueFromCell(Cell cell) {
 
         String cont_cell = "";
         if (cell != null) {
@@ -202,20 +209,20 @@ String query = "INSERT INTO "+tablaBD +" "+ querys.getHeadersTable(tablaBD);
                     }
                     break;
                 case ERROR:
-                    cont_cell = ("vacia");
+                    cont_cell = ("0");
                     break;
                 case BLANK:
-                    cont_cell = ("vacia");
+                    cont_cell = ("0");
                     break;
                 case _NONE:
-                    cont_cell = ("vacia");
+                    cont_cell = ("0");
                     break;
                 default:
-                    cont_cell = ("vacia");
+                    cont_cell = ("0");
                     break;
             }
         } else {
-            cont_cell = ("vacia");
+            cont_cell = ("0");
         }
         return cont_cell;
     }

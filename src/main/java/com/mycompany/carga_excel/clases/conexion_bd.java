@@ -37,7 +37,7 @@ public class Conexion_bd {
         try {
             //establece la conexión con la bd
             Connection connection = DriverManager.getConnection(connectionUrl);
-            System.out.println("COnexion_bd/conectar/Conexión establecida");
+            System.out.println("Conexion_bd/conectar/Conexión establecida");
             return connection;
 
         } catch (Exception e) {
