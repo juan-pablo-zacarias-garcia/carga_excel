@@ -4,13 +4,9 @@
  */
 package com.mycompany.carga_excel.clases;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.util.ArrayList;
 
 /**
  *
@@ -46,6 +42,27 @@ public class Consultas {
             return null;
         }
         
+    }
+    public String [] getTypesColumns(String tablaBD){
+        String query = "Select  DATA_TYPE as type from information_schema.columns WHERE TABLE_NAME='"+tablaBD+"'";
+        ArrayList<String> types = new ArrayList<String>();
+        try{
+            Conexion_bd obj_bd = new Conexion_bd();
+            Connection  conn = obj_bd.conectar("");
+            
+            ResultSet rs = obj_bd.query(query, conn);
+            
+            while (rs.next()) {
+                String item = rs.getString("type");
+                types.add(item);
+            }
+            //Cerramos la conexión
+            conn.close();
+            return types.toArray(new String[types.size()]);
+        }catch(Exception e){
+            System.out.println("Consultas/getTypesColumns/ "+e);
+            return null;
+        }
     }
     
 }

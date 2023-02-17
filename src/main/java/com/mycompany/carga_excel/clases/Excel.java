@@ -107,9 +107,8 @@ public class Excel {
         //terminamos de dar formato a las columnas de la consulta
         cols = "(" + cols.substring(0, cols.length() - 1) + ")";
 
-//        String query = "INSERT INTO " + tablaBD + " "
-//                + querys.columns;
 String query = "INSERT INTO "+tablaBD +" "+ querys.getHeadersTable(tablaBD);
+String [] types_data_columns = querys.getTypesColumns(tablaBD);
         //se crea una conexion
         Connection conn = obj_bd.conectar("");
         //index para extraer elementos del arraylist con las celdas de excel
@@ -127,15 +126,29 @@ String query = "INSERT INTO "+tablaBD +" "+ querys.getHeadersTable(tablaBD);
                 values = "";
                 //se extraen los elementos del arraylist dependiendo el número de columnas y se les da formato
                 for (int j = 0; j < no_columns; j++) {
+                    
                     if (index_item < items.size()) {
-                        try{
-                            //Si s puede convertir a número etonces lo guarda como número
+                        //Verifica el tipo de dato de la columna de la tabla de la bd y denpendiedo de este hace la conversion del item a string, int o double
+                        if(types_data_columns[j].equalsIgnoreCase("money")){
                             float valorCelda = Float.parseFloat(items.get(index_item).toString());
                             values = values + items.get(index_item) + ",";
-                        }catch(Exception e){
-                            //Si no, lo guarda como String
-                         values = values + "\'" + items.get(index_item) + "\',";   
+                        }else{
+                            if(types_data_columns[j].equalsIgnoreCase("int")){
+                                int valorCelda = (int) Float.parseFloat(items.get(index_item).toString());
+                                values = values + items.get(index_item) + ",";
+                            }else{
+                                values = values + "\'" + items.get(index_item) + "\',";
+                            }
                         }
+                        
+//                        try{
+//                            //Si s puede convertir a número etonces lo guarda como número
+//                            float valorCelda = Float.parseFloat(items.get(index_item).toString());
+//                            values = values + items.get(index_item) + ",";
+//                        }catch(Exception e){
+//                            //Si no, lo guarda como String
+//                         values = values + "\'" + items.get(index_item) + "\',";   
+//                        }
                         //index del array list
                         index_item++;
                     }
@@ -186,8 +199,6 @@ String query = "INSERT INTO "+tablaBD +" "+ querys.getHeadersTable(tablaBD);
                         cell.setCellType(STRING);
                         String aux = cell.getStringCellValue();
                         //Lo convertimos a número para formatearlo con dos decimales
-                        double num_f = Double.parseDouble(aux);
-                        aux = df.format(num_f);
                         //Se guarda el dato formateado a 2 decimales
                         cont_cell = (aux);
                     }
